@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { t } from '../strings.js';
 
 // A panel that slides up from the bottom of the screen.
 export default function Sheet({ title, onClose, children }) {
@@ -18,7 +19,7 @@ export default function Sheet({ title, onClose, children }) {
       <div className="sheet" role="dialog" aria-modal="true" aria-label={title}>
         <div className="sheet-head">
           <h2>{title}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </div>

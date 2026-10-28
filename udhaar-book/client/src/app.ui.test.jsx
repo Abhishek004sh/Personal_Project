@@ -7,6 +7,7 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 import App from './App.jsx';
+import { setLang } from './strings.js';
 
 const require = createRequire(import.meta.url);
 const { createApp } = require('../../server/src/app.js');
@@ -39,6 +40,7 @@ afterAll(() => {
 beforeEach(() => {
   cleanup();
   localStorage.clear();
+  setLang('en'); // the app opens in Hinglish; these tests look for English words
   window.history.pushState({}, '', '/');
 });
 
@@ -155,6 +157,40 @@ describe('Udhaar Book screens', () => {
     await user.clear(screen.getByRole('searchbox'));
     await user.type(screen.getByRole('searchbox'), 'rohta');
     expect(await screen.findByRole('link', { name: /Ramesh Sharma/ })).toBeInTheDocument();
+  });
+
+  it('language button goes Hinglish -> Hindi -> English, remembers the choice, and works after login', async () => {
+    const user = userEvent.setup();
+    setLang('hinglish');
+    render(<App />);
+
+    // Login screen in Hinglish
+    expect(await screen.findByRole('button', { name: 'Log in karein' })).toBeInTheDocument();
+
+    // -> Hindi
+    await user.click(screen.getByRole('button', { name: 'Bhasha badlein' }));
+    expect(await screen.findByRole('button', { name: 'लॉग इन करें' })).toBeInTheDocument();
+    expect(localStorage.getItem('udhaar_lang')).toBe('hi');
+    expect(document.documentElement.lang).toBe('hi');
+
+    // -> English
+    await user.click(screen.getByRole('button', { name: 'भाषा बदलें' }));
+    expect(await screen.findByRole('button', { name: 'Log in' })).toBeInTheDocument();
+    expect(localStorage.getItem('udhaar_lang')).toBe('en');
+
+    // -> back to Hinglish, then log in
+    await user.click(screen.getByRole('button', { name: 'Change language' }));
+    await user.type(await screen.findByLabelText('Password'), PASSWORD);
+    await user.click(screen.getByRole('button', { name: 'Log in karein' }));
+    await screen.findByRole('navigation', { name: 'Main' });
+
+    // Switch to Hindi inside the app: the tab bar and the customer list change words
+    await user.click(screen.getByRole('button', { name: 'Bhasha badlein' }));
+    const nav = screen.getByRole('navigation', { name: 'Main' });
+    expect(within(nav).getByRole('link', { name: 'ग्राहक' })).toBeInTheDocument();
+    await user.click(within(nav).getByRole('link', { name: 'ग्राहक' }));
+    expect(await screen.findByPlaceholderText('नाम, फ़ोन या इलाका खोजें')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ग्राहक जोड़ें' })).toBeInTheDocument();
   });
 
   it('logging out returns to the login screen and drops the saved login', async () => {

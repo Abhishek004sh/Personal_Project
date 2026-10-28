@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useLoad } from '../useLoad.js';
-import { formatRupees, formatDate, daysText, whatsappLink } from '../money.js';
-import { t } from '../strings.js';
+import { formatRupees, formatDate, whatsappLink } from '../money.js';
+import { t, getLang } from '../strings.js';
 import Sheet from '../components/Sheet.jsx';
 import CustomerForm from '../components/CustomerForm.jsx';
 import EntrySheet from '../components/EntrySheet.jsx';
@@ -66,7 +66,7 @@ export default function CustomerDetail() {
           <div className="hero-label">{balanceLabel}</div>
           <div className={`balance-amount ${balanceClass}`}>{balanceText}</div>
           {balancePaise > 0 && customer.oldestUnpaidDays !== null && (
-            <div className="row-sub">Oldest pending amount is {daysText(customer.oldestUnpaidDays)} old</div>
+            <div className="row-sub">{t.oldestPending(t.days(customer.oldestUnpaidDays))}</div>
           )}
         </div>
 
@@ -99,7 +99,7 @@ export default function CustomerDetail() {
                     {t[e.type]}
                     {e.type === 'payment' && e.method ? ` · ${t[e.method] || e.method}` : ''}
                   </div>
-                  <div className="row-sub">{formatDate(e.date)}{e.note ? ` · ${e.note}` : ''}</div>
+                  <div className="row-sub">{formatDate(e.date, getLang())}{e.note ? ` · ${e.note}` : ''}</div>
                   {e.voided && (
                     <div className="row-sub">{t.cancelledLabel}: {e.voided.reason}</div>
                   )}

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatRupees, daysText } from '../money.js';
+import { formatRupees } from '../money.js';
 import { t } from '../strings.js';
 
 export default function CustomerRow({ customer }) {
@@ -12,7 +12,7 @@ export default function CustomerRow({ customer }) {
   if (balancePaise > 0) {
     amountClass = 'owed';
     amountText = formatRupees(balancePaise);
-    amountSub = oldestUnpaidDays !== null ? `since ${daysText(oldestUnpaidDays)}` : '';
+    amountSub = oldestUnpaidDays !== null ? t.since(t.days(oldestUnpaidDays)) : '';
   } else if (balancePaise < 0) {
     amountClass = 'paid';
     amountText = `${t.advance} ${formatRupees(-balancePaise)}`;

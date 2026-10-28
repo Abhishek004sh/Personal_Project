@@ -23,9 +23,10 @@ export function formatRupees(paise) {
   }).format(value);
 }
 
-export function formatDate(iso) {
+// `lang` is the app language ('hi', 'hinglish' or 'en'). Only Hindi uses Hindi month names.
+export function formatDate(iso, lang = 'en') {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-IN', {
+  return new Date(iso).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -36,15 +37,6 @@ export function formatDate(iso) {
 // Today's date in India as YYYY-MM-DD (for the date box).
 export function todayIST() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-}
-
-export function daysText(days) {
-  if (days === null || days === undefined) return '';
-  if (days === 0) return 'today';
-  if (days === 1) return '1 day';
-  if (days < 60) return `${days} days`;
-  const months = Math.floor(days / 30);
-  return `${months} months`;
 }
 
 // Opens WhatsApp with a message already typed. Nothing is sent until a person

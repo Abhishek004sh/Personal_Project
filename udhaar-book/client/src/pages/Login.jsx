@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { api, auth } from '../api.js';
 import { t } from '../strings.js';
+import LanguageSwitch from '../components/LanguageSwitch.jsx';
 
-export default function Login({ onLoggedIn }) {
+export default function Login({ onLoggedIn, lang, onLang }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -23,6 +24,7 @@ export default function Login({ onLoggedIn }) {
 
   return (
     <main className="login">
+      <LanguageSwitch lang={lang} onChange={onLang} className="on-light login-lang" />
       <img src="/icon-192.png" alt="" width="72" height="72" className="login-logo" />
       <h1>{t.appName}</h1>
       <form onSubmit={submit} className="form">

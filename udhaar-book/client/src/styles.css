@@ -214,3 +214,15 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
 .login { max-width: 360px; margin: 0 auto; padding: 14vh 20px 20px; display: grid; gap: 18px; justify-items: center; }
 .login .form { width: 100%; }
 .login-logo { border-radius: 18px; }
+
+/* Language button: shows the language in use, tap to move to the next one */
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.lang-btn {
+  min-height: 40px; padding: 0 14px; border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 55%, transparent);
+  background: transparent; color: var(--brand-ink);
+  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.lang-btn.on-light { border-color: var(--brand); color: var(--brand); }
+.login { position: relative; }
+.login-lang { position: absolute; top: 16px; right: 16px; }

@@ -20,7 +20,7 @@ export default function EntrySheet({ type, customer, onClose, onSaved }) {
   async function submit(e) {
     e.preventDefault();
     if (!paise) {
-      setError('Enter the amount in rupees, for example 2500 or 2500.50');
+      setError(t.amountError);
       return;
     }
     setError('');

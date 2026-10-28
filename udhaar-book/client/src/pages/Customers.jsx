@@ -35,7 +35,7 @@ export default function Customers() {
           aria-label={t.searchPlaceholder}
           autoComplete="off"
         />
-        <div className="segmented" role="group" aria-label="Sort">
+        <div className="segmented" role="group" aria-label={t.sortLabel}>
           <button type="button" className={sort === 'balance' ? 'on' : ''} onClick={() => setSort('balance')}>
             {t.sortByPending}
           </button>

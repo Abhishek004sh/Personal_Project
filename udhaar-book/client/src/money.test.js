@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRupeesToPaise, formatRupees, daysText, whatsappLink } from './money.js';
+import { parseRupeesToPaise, formatRupees, formatDate, whatsappLink } from './money.js';
 
 test('parseRupeesToPaise reads normal amounts', () => {
   assert.equal(parseRupeesToPaise('1500'), 150000);
@@ -29,12 +29,13 @@ test('formatRupees uses Indian grouping', () => {
   assert.equal(formatRupees(0).replace(/\s/g, ''), '₹0');
 });
 
-test('daysText', () => {
-  assert.equal(daysText(0), 'today');
-  assert.equal(daysText(1), '1 day');
-  assert.equal(daysText(45), '45 days');
-  assert.equal(daysText(95), '3 months');
-  assert.equal(daysText(null), '');
+test('formatDate: Hindi month names only in Hindi, same day in every language', () => {
+  const iso = '2026-08-15T06:30:00Z';
+  assert.equal(formatDate(iso), '15 Aug 2026');
+  assert.equal(formatDate(iso, 'hinglish'), '15 Aug 2026');
+  assert.match(formatDate(iso, 'hi'), /[ऀ-ॿ]/);
+  assert.match(formatDate(iso, 'hi'), /15/);
+  assert.equal(formatDate(''), '');
 });
 
 test('whatsappLink needs a 10 digit number and encodes the text', () => {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Sheet from './Sheet.jsx';
 import { api } from '../api.js';
 import { formatRupees, formatDate } from '../money.js';
-import { t } from '../strings.js';
+import { t, getLang } from '../strings.js';
 
 // Entries are never deleted. A wrong entry is cancelled with a reason and
 // stays in the history.
@@ -28,7 +28,7 @@ export default function VoidSheet({ entry, onClose, onDone }) {
     <Sheet title={t.cancelEntryTitle} onClose={onClose}>
       <form onSubmit={submit} className="form">
         <p className="preview">
-          {t[entry.type]} · <strong>{formatRupees(entry.amountPaise)}</strong> · {formatDate(entry.date)}
+          {t[entry.type]} · <strong>{formatRupees(entry.amountPaise)}</strong> · {formatDate(entry.date, getLang())}
         </p>
         <p className="help">{t.cancelEntryHelp}</p>
         <label>
@@ -40,7 +40,7 @@ export default function VoidSheet({ entry, onClose, onDone }) {
             autoFocus
             required
             minLength={3}
-            placeholder="e.g. wrong amount, wrong customer"
+            placeholder={t.reasonPlaceholder}
             autoComplete="off"
           />
         </label>

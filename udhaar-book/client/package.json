@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/money.test.js && vitest run",
+    "test": "node --test src/money.test.js src/strings.test.js && vitest run",
     "test:ui": "vitest run"
   },
   "keywords": [],
