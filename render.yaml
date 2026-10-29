@@ -1,0 +1,26 @@
+# Tells Render how to run Udhaar Book. One web service: the server also
+# serves the built phone app, and the data lives in MongoDB Atlas.
+services:
+  - type: web
+    name: udhaar-book
+    runtime: node
+    region: singapore          # closest Render region to India
+    plan: free
+    rootDir: udhaar-book
+    # The app is built with Vite, which is a "dev" tool, so --include=dev is needed
+    # (Render sets NODE_ENV=production, which would normally skip it).
+    buildCommand: npm --prefix client ci --include=dev && npm --prefix client run build && npm --prefix server ci
+    startCommand: npm --prefix server start
+    healthCheckPath: /api/health
+    autoDeploy: true            # a new commit on the branch redeploys by itself
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: TRUST_PROXY        # Render sits in front of the app; needed to see the real visitor address
+        value: "true"
+      - key: JWT_SECRET         # Render makes a long random one for you
+        generateValue: true
+      - key: MONGODB_URI        # you type this in Render's website, never in GitHub
+        sync: false
+      - key: ADMIN_PASSWORD     # the password for logging in to the app
+        sync: false
