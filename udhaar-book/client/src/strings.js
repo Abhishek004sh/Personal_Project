@@ -99,6 +99,31 @@ const en = {
     return `${Math.floor(n / 30)} months`;
   },
 
+  // suppliers (Dena hai) and the two home cards
+  navSuppliers: 'Suppliers',
+  receiveCard: 'To receive',
+  payCard: 'To pay',
+  suppliersToPay: (n) => `${n} ${n === 1 ? 'supplier' : 'suppliers'} to be paid`,
+  topOwedSuppliersTitle: 'Most to pay',
+  noRecentPaymentTitle: (days) => `Nothing paid for ${days}+ days`,
+  nothingToPay: 'Nothing to pay. 🎉',
+  addSupplier: 'Add supplier',
+  searchSupplierPlaceholder: 'Search name, area or bill number',
+  noSuppliers: 'No suppliers yet. Add the first one.',
+  noSupplierMatches: 'No suppliers match your search.',
+  sortByToPay: 'Most to pay',
+  advancePaid: 'Paid in advance',
+  tookGoods: 'Took goods (credit)',
+  gavePayment: 'Made payment',
+  supplierCredit: 'Goods taken on credit',
+  supplierPayment: 'Payment made',
+  whatWasTaken: 'What was taken (optional)',
+  methodPaid: 'Paid by',
+  billNoOptional: 'Bill number (optional)',
+  billText: (no) => `Bill: ${no}`,
+  lastPaid: (n) => (n === 0 ? 'Last paid today' : `Last paid ${en.days(n)} ago`),
+  neverPaid: 'No payment made yet',
+
   loading: 'Loading…',
   tryAgain: 'Try again',
   genericError: 'Something went wrong. Please try again.',
@@ -189,6 +214,30 @@ const hinglish = {
     if (n < 60) return `${n} din`;
     return `${Math.floor(n / 30)} mahine`;
   },
+
+  navSuppliers: 'Suppliers',
+  receiveCard: 'Lena hai',
+  payCard: 'Dena hai',
+  suppliersToPay: (n) => `${n} supplier ko dena hai`,
+  topOwedSuppliersTitle: 'Sabse zyada dena hai',
+  noRecentPaymentTitle: (days) => `${days} din se paisa nahi diya`,
+  nothingToPay: 'Kisi ko kuch dena nahi. 🎉',
+  addSupplier: 'Supplier jodein',
+  searchSupplierPlaceholder: 'Naam, area ya bill number khojein',
+  noSuppliers: 'Abhi koi supplier nahi hai. Pehla supplier jodein.',
+  noSupplierMatches: 'Koi supplier nahi mila.',
+  sortByToPay: 'Zyada dena pehle',
+  advancePaid: 'Advance diya',
+  tookGoods: 'Maal liya (udhaar)',
+  gavePayment: 'Paisa diya',
+  supplierCredit: 'Maal liya udhaar',
+  supplierPayment: 'Paisa diya',
+  whatWasTaken: 'Kya maal liya (zaroori nahi)',
+  methodPaid: 'Kaise diya',
+  billNoOptional: 'Bill number (zaroori nahi)',
+  billText: (no) => `Bill: ${no}`,
+  lastPaid: (n) => (n === 0 ? 'Pichhla paisa aaj diya' : `Pichhla paisa ${hinglish.days(n)} pehle diya`),
+  neverPaid: 'Abhi tak koi paisa nahi diya',
 
   loading: 'Load ho raha hai…',
   tryAgain: 'Dobara koshish karein',
@@ -281,6 +330,30 @@ const hi = {
     return `${Math.floor(n / 30)} महीने`;
   },
 
+  navSuppliers: 'सप्लायर',
+  receiveCard: 'लेना है',
+  payCard: 'देना है',
+  suppliersToPay: (n) => `${n} सप्लायर को देना है`,
+  topOwedSuppliersTitle: 'सबसे ज़्यादा देना है',
+  noRecentPaymentTitle: (days) => `${days} दिन से पैसा नहीं दिया`,
+  nothingToPay: 'किसी को कुछ देना नहीं। 🎉',
+  addSupplier: 'सप्लायर जोड़ें',
+  searchSupplierPlaceholder: 'नाम, इलाका या बिल नंबर खोजें',
+  noSuppliers: 'अभी कोई सप्लायर नहीं है। पहला सप्लायर जोड़ें।',
+  noSupplierMatches: 'कोई सप्लायर नहीं मिला।',
+  sortByToPay: 'ज़्यादा देना पहले',
+  advancePaid: 'एडवांस दिया',
+  tookGoods: 'माल लिया (उधार)',
+  gavePayment: 'पैसा दिया',
+  supplierCredit: 'माल लिया उधार',
+  supplierPayment: 'पैसा दिया',
+  whatWasTaken: 'क्या माल लिया (ज़रूरी नहीं)',
+  methodPaid: 'कैसे दिया',
+  billNoOptional: 'बिल नंबर (ज़रूरी नहीं)',
+  billText: (no) => `बिल: ${no}`,
+  lastPaid: (n) => (n === 0 ? 'पिछला पैसा आज दिया' : `पिछला पैसा ${hi.days(n)} पहले दिया`),
+  neverPaid: 'अभी तक कोई पैसा नहीं दिया',
+
   loading: 'लोड हो रहा है…',
   tryAgain: 'फिर कोशिश करें',
   genericError: 'कुछ गड़बड़ हो गई। फिर कोशिश करें।',
@@ -329,3 +402,10 @@ export const t = new Proxy({}, {
     return own !== undefined ? own : en[key];
   },
 });
+
+// Customers and suppliers use different words for the same two kinds of entry:
+//   customer: "Maal udhaar" / "Paisa mila"      supplier: "Maal liya udhaar" / "Paisa diya"
+export function entryLabel(kind, type) {
+  if (kind === 'supplier') return type === 'credit' ? t.supplierCredit : t.supplierPayment;
+  return type === 'credit' ? t.credit : t.payment;
+}

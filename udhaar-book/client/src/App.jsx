@@ -46,8 +46,11 @@ export default function App() {
       <main className="page">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/customers" element={<Customers />} />
+          {/* key makes React start a fresh list (search box, sorting) when you move between the two sections */}
+          <Route path="/customers" element={<Customers key="customer" kind="customer" />} />
           <Route path="/customers/:id" element={<CustomerDetail />} />
+          <Route path="/suppliers" element={<Customers key="supplier" kind="supplier" />} />
+          <Route path="/suppliers/:id" element={<CustomerDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
@@ -55,6 +58,7 @@ export default function App() {
       <nav className="tabbar" aria-label="Main">
         <NavLink to="/" end>{t.navHome}</NavLink>
         <NavLink to="/customers">{t.navCustomers}</NavLink>
+        <NavLink to="/suppliers">{t.navSuppliers}</NavLink>
       </nav>
     </BrowserRouter>
   );

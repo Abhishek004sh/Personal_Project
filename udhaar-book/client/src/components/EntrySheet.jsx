@@ -7,6 +7,9 @@ import { t } from '../strings.js';
 // Form for one new entry: goods given on credit, or a payment received.
 export default function EntrySheet({ type, customer, onClose, onSaved }) {
   const isCredit = type === 'credit';
+  // For a supplier "credit" means we took goods (we owe more) and "payment" means we paid.
+  const isSupplier = customer.kind === 'supplier';
+  const [billNo, setBillNo] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(todayIST());
   const [note, setNote] = useState('');
@@ -32,6 +35,7 @@ export default function EntrySheet({ type, customer, onClose, onSaved }) {
         date,
         note,
         ...(isCredit ? {} : { method }),
+        ...(isSupplier && isCredit ? { billNo } : {}),
       });
       onSaved();
     } catch (err) {
@@ -41,7 +45,10 @@ export default function EntrySheet({ type, customer, onClose, onSaved }) {
   }
 
   return (
-    <Sheet title={isCredit ? t.gaveGoods : t.gotPayment} onClose={onClose}>
+    <Sheet
+      title={isSupplier ? (isCredit ? t.tookGoods : t.gavePayment) : isCredit ? t.gaveGoods : t.gotPayment}
+      onClose={onClose}
+    >
       <form onSubmit={submit} className="form">
         <label>
           {t.amount}
@@ -58,7 +65,7 @@ export default function EntrySheet({ type, customer, onClose, onSaved }) {
 
         {!isCredit && (
           <fieldset className="chips">
-            <legend>{t.method}</legend>
+            <legend>{isSupplier ? t.methodPaid : t.method}</legend>
             {['cash', 'upi', 'other'].map((m) => (
               <label key={m} className={`chip ${method === m ? 'on' : ''}`}>
                 <input type="radio" name="method" value={m} checked={method === m} onChange={() => setMethod(m)} />
@@ -73,8 +80,15 @@ export default function EntrySheet({ type, customer, onClose, onSaved }) {
           <input type="date" value={date} max={todayIST()} onChange={(e) => setDate(e.target.value)} required />
         </label>
 
+        {isSupplier && isCredit && (
+          <label>
+            {t.billNoOptional}
+            <input value={billNo} onChange={(e) => setBillNo(e.target.value)} maxLength={40} autoComplete="off" />
+          </label>
+        )}
+
         <label>
-          {isCredit ? t.whatWasGiven : t.remark}
+          {isCredit ? (isSupplier ? t.whatWasTaken : t.whatWasGiven) : t.remark}
           <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} autoComplete="off" />
         </label>
 

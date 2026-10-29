@@ -3,7 +3,8 @@ import { formatRupees } from '../money.js';
 import { t } from '../strings.js';
 
 export default function CustomerRow({ customer }) {
-  const { id, name, area, phone, balancePaise, oldestUnpaidDays } = customer;
+  const { id, name, area, phone, balancePaise, oldestUnpaidDays, lastPaymentDays, kind } = customer;
+  const isSupplier = kind === 'supplier';
   const sub = [area, phone].filter(Boolean).join(' · ');
 
   let amountClass = 'muted';
@@ -12,14 +13,20 @@ export default function CustomerRow({ customer }) {
   if (balancePaise > 0) {
     amountClass = 'owed';
     amountText = formatRupees(balancePaise);
-    amountSub = oldestUnpaidDays !== null ? t.since(t.days(oldestUnpaidDays)) : '';
+    // Customers: how long the oldest amount has been pending.
+    // Suppliers: when we last paid them.
+    if (isSupplier) {
+      amountSub = lastPaymentDays === null ? t.neverPaid : t.lastPaid(lastPaymentDays);
+    } else {
+      amountSub = oldestUnpaidDays !== null ? t.since(t.days(oldestUnpaidDays)) : '';
+    }
   } else if (balancePaise < 0) {
     amountClass = 'paid';
-    amountText = `${t.advance} ${formatRupees(-balancePaise)}`;
+    amountText = `${isSupplier ? t.advancePaid : t.advance} ${formatRupees(-balancePaise)}`;
   }
 
   return (
-    <Link to={`/customers/${id}`} className="row">
+    <Link to={`${isSupplier ? '/suppliers' : '/customers'}/${id}`} className="row">
       <div className="row-main">
         <div className="row-title">{name}</div>
         {sub && <div className="row-sub">{sub}</div>}

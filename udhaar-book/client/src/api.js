@@ -52,9 +52,10 @@ async function request(method, path, body) {
 
 export const api = {
   login: (password) => request('POST', '/auth/login', { password }),
-  dashboard: () => request('GET', '/dashboard'),
-  customers: (q = '', sort = 'balance') =>
-    request('GET', `/customers?sort=${sort}${q ? `&q=${encodeURIComponent(q)}` : ''}`),
+  // kind is 'customer' (Lena hai) or 'supplier' (Dena hai)
+  dashboard: (kind = 'customer') => request('GET', `/dashboard?kind=${kind}`),
+  customers: (q = '', sort = 'balance', kind = 'customer') =>
+    request('GET', `/customers?kind=${kind}&sort=${sort}${q ? `&q=${encodeURIComponent(q)}` : ''}`),
   customer: (id) => request('GET', `/customers/${id}`),
   createCustomer: (data) => request('POST', '/customers', data),
   updateCustomer: (id, data) => request('PATCH', `/customers/${id}`, data),

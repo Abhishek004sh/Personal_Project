@@ -77,6 +77,20 @@ function cleanDate(value, now = new Date()) {
   return d;
 }
 
+const KINDS = ['customer', 'supplier'];
+
+// Who an account belongs to. Empty means a customer (how v1 worked).
+function cleanKind(value) {
+  if (value === undefined || value === null || value === '') return 'customer';
+  if (!KINDS.includes(value)) throw new ValidationError('Kind must be customer or supplier');
+  return value;
+}
+
+// Supplier bill number: short text like "INV-2041" or "1187/A".
+function cleanBillNo(value) {
+  return cleanText(value, { field: 'Bill number', max: 40 });
+}
+
 const PAYMENT_METHODS = ['cash', 'upi', 'other'];
 
 function cleanMethod(value, type) {
@@ -93,5 +107,8 @@ module.exports = {
   cleanAmountPaise,
   cleanDate,
   cleanMethod,
+  cleanKind,
+  cleanBillNo,
+  KINDS,
   PAYMENT_METHODS,
 };

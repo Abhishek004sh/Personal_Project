@@ -7,7 +7,27 @@ import CustomerRow from '../components/CustomerRow.jsx';
 import CustomerForm from '../components/CustomerForm.jsx';
 import Sheet from '../components/Sheet.jsx';
 
-export default function Customers() {
+// One list page for both sections. kind="customer" is "Lena hai",
+// kind="supplier" is "Dena hai". Only the words and the web address change.
+export default function Customers({ kind = 'customer' }) {
+  const isSupplier = kind === 'supplier';
+  const base = isSupplier ? '/suppliers' : '/customers';
+  const words = isSupplier
+    ? {
+        placeholder: t.searchSupplierPlaceholder,
+        sortFirst: t.sortByToPay,
+        add: t.addSupplier,
+        empty: t.noSuppliers,
+        noMatch: t.noSupplierMatches,
+      }
+    : {
+        placeholder: t.searchPlaceholder,
+        sortFirst: t.sortByPending,
+        add: t.addCustomer,
+        empty: t.emptyShop,
+        noMatch: t.noMatches,
+      };
+
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');
@@ -15,13 +35,13 @@ export default function Customers() {
   const q = useDebounced(query.trim());
   const adding = params.get('add') === '1';
 
-  const { data, error, loading, reload } = useLoad(() => api.customers(q, sort), [q, sort]);
+  const { data, error, loading, reload } = useLoad(() => api.customers(q, sort, kind), [q, sort, kind]);
 
   const closeAdd = () => setParams({}, { replace: true });
 
   async function create(form) {
-    const customer = await api.createCustomer(form);
-    navigate(`/customers/${customer.id}`);
+    const person = await api.createCustomer({ ...form, kind });
+    navigate(`${base}/${person.id}`);
   }
 
   return (
@@ -31,13 +51,13 @@ export default function Customers() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.searchPlaceholder}
-          aria-label={t.searchPlaceholder}
+          placeholder={words.placeholder}
+          aria-label={words.placeholder}
           autoComplete="off"
         />
         <div className="segmented" role="group" aria-label={t.sortLabel}>
           <button type="button" className={sort === 'balance' ? 'on' : ''} onClick={() => setSort('balance')}>
-            {t.sortByPending}
+            {words.sortFirst}
           </button>
           <button type="button" className={sort === 'name' ? 'on' : ''} onClick={() => setSort('name')}>
             {t.sortByName}
@@ -53,7 +73,7 @@ export default function Customers() {
         </div>
       )}
       {data && data.length === 0 && (
-        <p className="center muted">{q ? t.noMatches : t.emptyShop}</p>
+        <p className="center muted">{q ? words.noMatch : words.empty}</p>
       )}
       {data && data.length > 0 && (
         <div className="list">
@@ -61,12 +81,12 @@ export default function Customers() {
         </div>
       )}
 
-      <button type="button" className="fab" onClick={() => setParams({ add: '1' })} aria-label={t.addCustomer}>
-        + {t.addCustomer}
+      <button type="button" className="fab" onClick={() => setParams({ add: '1' })} aria-label={words.add}>
+        + {words.add}
       </button>
 
       {adding && (
-        <Sheet title={t.addCustomer} onClose={closeAdd}>
+        <Sheet title={words.add} onClose={closeAdd}>
           <CustomerForm onSubmit={create} onCancel={closeAdd} />
         </Sheet>
       )}

@@ -87,6 +87,10 @@ function customerSummary(customer, entries, now = new Date()) {
     balancePaise,
     lastEntryAt,
     lastPaymentAt,
+    // Days since the last payment (null if there has never been one). For
+    // suppliers this matters more than "oldest unpaid", because their
+    // accounts run on and are paid a little at a time.
+    lastPaymentDays: lastPaymentAt ? daysBetween(lastPaymentAt, now) : null,
     oldestUnpaidAt: oldest,
     oldestUnpaidDays: oldest ? daysBetween(oldest, now) : null,
   };
@@ -121,6 +125,12 @@ function buildDashboard(customers, allEntries, now = new Date(), overdueDays = 3
     .filter((s) => s.oldestUnpaidDays !== null && s.oldestUnpaidDays >= overdueDays)
     .sort((a, b) => b.oldestUnpaidDays - a.oldestUnpaidDays);
 
+  // Accounts with money pending where nothing has been paid for a while
+  // (or ever). Most useful for suppliers.
+  const noRecentPayment = owing
+    .filter((s) => s.lastPaymentDays === null || s.lastPaymentDays >= overdueDays)
+    .sort((a, b) => b.balancePaise - a.balancePaise);
+
   const monthStart = startOfMonthIST(now);
   let collectedThisMonthPaise = 0;
   let creditThisMonthPaise = 0;
@@ -140,6 +150,7 @@ function buildDashboard(customers, allEntries, now = new Date(), overdueDays = 3
     overduePaise: overdue.reduce((sum, s) => sum + s.balancePaise, 0),
     topOwing,
     overdue,
+    noRecentPayment,
     collectedThisMonthPaise,
     creditThisMonthPaise,
   };
