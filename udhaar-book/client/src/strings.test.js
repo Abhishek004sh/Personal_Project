@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DICTIONARIES, LANGS, t, setLang, getLang } from './strings.js';
+import { DICTIONARIES, LANGS, t, setLang, getLang, entryLabel } from './strings.js';
 
 test('all three languages have exactly the same words', () => {
   const keysOf = (lang) => Object.keys(DICTIONARIES[lang]).sort();
@@ -58,4 +58,29 @@ test('sentences with a number or name', () => {
   assert.match(t.reminderMessage('रमेश', '₹500'), /रमेश जी.*₹500/);
   setLang('hinglish');
   assert.equal(t.since(t.days(45)), '45 din se');
+});
+
+test('customers and suppliers use their own words for the same two entries', () => {
+  setLang('hinglish');
+  assert.deepEqual(
+    [entryLabel('customer', 'credit'), entryLabel('customer', 'payment')],
+    ['Maal udhaar', 'Paisa mila']
+  );
+  assert.deepEqual(
+    [entryLabel('supplier', 'credit'), entryLabel('supplier', 'payment')],
+    ['Maal liya udhaar', 'Paisa diya']
+  );
+  setLang('hi');
+  assert.equal(entryLabel('supplier', 'credit'), 'माल लिया उधार');
+  setLang('en');
+  assert.equal(entryLabel('supplier', 'payment'), 'Payment made');
+});
+
+test('"last paid" wording handles today, days and months in every language', () => {
+  setLang('en');
+  assert.deepEqual([t.lastPaid(0), t.lastPaid(10), t.lastPaid(95)], ['Last paid today', 'Last paid 10 days ago', 'Last paid 3 months ago']);
+  setLang('hinglish');
+  assert.deepEqual([t.lastPaid(0), t.lastPaid(10)], ['Pichhla paisa aaj diya', 'Pichhla paisa 10 din pehle diya']);
+  setLang('hi');
+  assert.deepEqual([t.lastPaid(0), t.lastPaid(10)], ['पिछला पैसा आज दिया', 'पिछला पैसा 10 दिन पहले दिया']);
 });

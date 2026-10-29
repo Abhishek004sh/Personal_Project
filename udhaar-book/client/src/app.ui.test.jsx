@@ -144,9 +144,10 @@ describe('Udhaar Book screens', () => {
     await logIn(user);
 
     // Home: dashboard figures from the earlier flow (₹2,500 pending)
-    expect(await screen.findByText('Total pending')).toBeInTheDocument();
-    expect(money(document.querySelector('.hero-amount').textContent)).toBe('₹2,500');
+    expect(await screen.findByText('To receive')).toBeInTheDocument();
+    expect(money(document.querySelector('.hero-card.receive .hero-amount').textContent)).toBe('₹2,500');
     expect(screen.getByText('1 customer owes money')).toBeInTheDocument();
+    expect(money(document.querySelector('.hero-card.pay .hero-amount').textContent)).toBe('₹0'); // no suppliers yet
 
     await user.click(screen.getByRole('link', { name: 'Customers' }));
     expect(await screen.findByRole('link', { name: /Ramesh Sharma/ })).toBeInTheDocument();
@@ -157,6 +158,78 @@ describe('Udhaar Book screens', () => {
     await user.clear(screen.getByRole('searchbox'));
     await user.type(screen.getByRole('searchbox'), 'rohta');
     expect(await screen.findByRole('link', { name: /Ramesh Sharma/ })).toBeInTheDocument();
+  });
+
+  it('suppliers: own section, maal liya with bill number, paisa diya, home card, bill search', async () => {
+    const user = userEvent.setup();
+    await logIn(user);
+    const nav = screen.getByRole('navigation', { name: 'Main' });
+
+    // Suppliers tab starts empty
+    await user.click(within(nav).getByRole('link', { name: 'Suppliers' }));
+    expect(await screen.findByText('No suppliers yet. Add the first one.')).toBeInTheDocument();
+
+    // Add a supplier
+    await user.click(screen.getByRole('button', { name: 'Add supplier' }));
+    let sheet = await screen.findByRole('dialog', { name: 'Add supplier' });
+    await user.type(within(sheet).getByLabelText('Name'), 'Kumar Plywood Traders');
+    await user.type(within(sheet).getByLabelText('Phone (10 digits)'), '9811122233');
+    await user.type(within(sheet).getByLabelText('Area'), 'Delhi');
+    await user.click(within(sheet).getByRole('button', { name: 'Save' }));
+
+    // Their page: nothing owed, no reminder (we do not remind suppliers), own buttons
+    expect(await screen.findByRole('heading', { name: 'Kumar Plywood Traders' })).toBeInTheDocument();
+    expect(screen.getByText('Settled')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '← Suppliers' })).toHaveAttribute('href', '/suppliers'); // back link, not the tab
+    expect(screen.queryByRole('link', { name: 'WhatsApp' })).not.toBeInTheDocument();
+
+    // Maal liya on credit, with a bill number
+    await user.click(screen.getByRole('button', { name: 'Took goods (credit)' }));
+    sheet = await screen.findByRole('dialog', { name: 'Took goods (credit)' });
+    await user.type(within(sheet).getByLabelText('Amount (₹)'), '50,000');
+    await user.type(within(sheet).getByLabelText('Bill number (optional)'), 'INV-2041');
+    await user.type(within(sheet).getByLabelText('What was taken (optional)'), '18mm BWP x 40');
+    await user.click(within(sheet).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(money(document.querySelector('.balance-amount').textContent)).toBe('₹50,000'));
+    expect(screen.getByText('To pay')).toBeInTheDocument();
+    expect(screen.getByText('Goods taken on credit')).toBeInTheDocument();
+    expect(screen.getByText(/Bill: INV-2041/)).toBeInTheDocument();
+    expect(screen.getByText('No payment made yet')).toBeInTheDocument();
+
+    // Paisa diya by UPI: no bill number box for a payment
+    await user.click(screen.getByRole('button', { name: 'Made payment' }));
+    sheet = await screen.findByRole('dialog', { name: 'Made payment' });
+    expect(within(sheet).queryByLabelText('Bill number (optional)')).not.toBeInTheDocument();
+    await user.type(within(sheet).getByLabelText('Amount (₹)'), '15000');
+    await user.click(within(sheet).getByText('UPI'));
+    await user.click(within(sheet).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(money(document.querySelector('.balance-amount').textContent)).toBe('₹35,000'));
+    expect(screen.getByText('Last paid today')).toBeInTheDocument();
+    expect(screen.getByText(/Payment made · UPI/)).toBeInTheDocument();
+
+    // Home: the "To pay" card shows what we owe, the "To receive" card is untouched
+    await user.click(within(nav).getByRole('link', { name: 'Home' }));
+    expect(await screen.findByText('To pay')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(money(document.querySelector('.hero-card.pay .hero-amount').textContent)).toBe('₹35,000')
+    );
+    expect(screen.getByText('1 supplier to be paid')).toBeInTheDocument();
+    expect(money(document.querySelector('.hero-card.receive .hero-amount').textContent)).toBe('₹2,500');
+
+    // Search the supplier list by bill number
+    await user.click(within(nav).getByRole('link', { name: 'Suppliers' }));
+    const box = await screen.findByRole('searchbox');
+    await user.type(box, 'inv-2041');
+    expect(await screen.findByRole('link', { name: /Kumar Plywood Traders/ })).toBeInTheDocument();
+    await user.clear(box);
+    await user.type(box, 'zzz');
+    expect(await screen.findByText('No suppliers match your search.')).toBeInTheDocument();
+
+    // The supplier is not in the customers list
+    await user.click(within(nav).getByRole('link', { name: 'Customers' }));
+    expect(await screen.findByRole('link', { name: /Ramesh Sharma/ })).toBeInTheDocument();
+    expect(screen.queryByText('Kumar Plywood Traders')).not.toBeInTheDocument();
   });
 
   it('language button goes Hinglish -> Hindi -> English, remembers the choice, and works after login', async () => {

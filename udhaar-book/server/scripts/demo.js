@@ -16,14 +16,17 @@ async function seed(store) {
     { name: 'Mohan Lal', phone: '9876500003', area: 'Kamla Nagar', notes: '' },
     { name: 'Gupta Builders', phone: '', area: 'Dayalbagh', notes: 'Pays by UPI' },
     { name: 'Anil Kumar', phone: '9876500005', area: 'Rohta Bagh', notes: '' },
+    // suppliers: we owe them ("Dena hai")
+    { name: 'Kumar Plywood Traders', phone: '9811100001', area: 'Delhi', notes: 'Main plywood supplier', kind: 'supplier' },
+    { name: 'Sharma Mica House', phone: '', area: 'Agra', notes: '', kind: 'supplier' },
   ];
   const c = [];
   for (const p of people) c.push(await store.createCustomer(p));
 
-  const add = (i, type, rupees, ago, note = '', method = '') =>
+  const add = (i, type, rupees, ago, note = '', method = '', billNo = '') =>
     store.createEntry({
       customerId: c[i].id, type, amountPaise: rupees * 100,
-      date: daysAgo(ago) + 'T06:30:00.000Z', note, method,
+      date: daysAgo(ago) + 'T06:30:00.000Z', note, method, billNo,
     });
 
   await add(0, 'credit', 42000, 80, '18mm BWP ply x 12, hinges');
@@ -35,6 +38,13 @@ async function seed(store) {
   await add(3, 'credit', 75000, 20, 'Kitchen material');
   await add(3, 'payment', 75000, 8, '', 'upi');
   await add(4, 'credit', 18000, 33, '12mm ply x 6');
+
+  // suppliers: goods taken on credit (with bill numbers), paid a little at a time
+  await add(5, 'credit', 250000, 60, '18mm BWP x 80', '', 'INV-2041');
+  await add(5, 'payment', 100000, 35, '', 'upi');
+  await add(5, 'credit', 120000, 15, '12mm marine x 30', '', 'INV-2107');
+  await add(5, 'payment', 50000, 6, '', 'upi');
+  await add(6, 'credit', 90000, 45, 'Mica sheets', '', '1187/A');
 }
 
 async function main() {

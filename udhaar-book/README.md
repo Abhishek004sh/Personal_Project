@@ -59,6 +59,21 @@ cd server && npm test     # money logic and every API route
 cd client && npm test     # amount handling, and clicking through the real screens
 ```
 
+## Put it on the internet (Render)
+
+`render.yaml` in the top folder of the repo tells Render what to do. Steps:
+
+1. Make a free account on render.com and sign in with GitHub, allowing it to see this repo.
+2. Click **New +**, then **Blueprint**, pick this repo and the `main` branch.
+3. Render asks for two values: `MONGODB_URI` (the Atlas connection line) and `ADMIN_PASSWORD`
+   (the login password for the app). `JWT_SECRET` is made by Render itself.
+4. Click **Apply**. The first build takes a few minutes. You get an address like
+   `https://udhaar-book.onrender.com`. Open it on the phone and use "Add to Home screen".
+
+On the free plan the app goes to sleep after about 15 minutes without visitors, and the first
+visit after that takes up to a minute to wake it. Data is safe because it lives in Atlas.
+In Atlas, "Network Access" must allow access from anywhere (0.0.0.0/0) because Render's address changes.
+
 ## Before putting it on the internet
 
 - Use a strong `ADMIN_PASSWORD` and keep `.env` private (it is already in `.gitignore`).

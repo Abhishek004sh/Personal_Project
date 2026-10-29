@@ -29,7 +29,8 @@ function createMemoryStore() {
         phone: data.phone || '',
         area: data.area || '',
         notes: data.notes || '',
-        roles: ['customer'],
+        kind: data.kind || 'customer',
+        roles: [data.kind || 'customer'],
         archived: false,
         createdAt: now,
         updatedAt: now,
@@ -66,6 +67,7 @@ function createMemoryStore() {
         date: new Date(data.date).toISOString(),
         note: data.note || '',
         method: data.method || '',
+        billNo: data.billNo || '',
         voided: null,
         createdAt: new Date().toISOString(),
       };

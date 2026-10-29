@@ -15,6 +15,8 @@ const {
   cleanAmountPaise,
   cleanDate,
   cleanMethod,
+  cleanKind,
+  cleanBillNo,
 } = require('./validate');
 
 // Wraps async route handlers so errors reach the error handler below.
@@ -70,7 +72,12 @@ function createApp({ store, config, clock = () => new Date() }) {
   app.get(
     '/api/dashboard',
     wrap(async (req, res) => {
-      const [customers, entries] = await Promise.all([store.listCustomers(), store.listAllEntries()]);
+      // ?kind=supplier gives the "Dena hai" side; no kind gives customers ("Lena hai").
+      const kind = cleanKind(req.query.kind);
+      const [everyone, allEntries] = await Promise.all([store.listCustomers(), store.listAllEntries()]);
+      const customers = everyone.filter((c) => c.kind === kind);
+      const ids = new Set(customers.map((c) => c.id));
+      const entries = allEntries.filter((e) => ids.has(e.customerId));
       res.json(buildDashboard(customers, entries, clock()));
     })
   );
@@ -78,7 +85,9 @@ function createApp({ store, config, clock = () => new Date() }) {
   app.get(
     '/api/customers',
     wrap(async (req, res) => {
-      const [customers, entries] = await Promise.all([store.listCustomers(), store.listAllEntries()]);
+      const kind = cleanKind(req.query.kind);
+      const [everyone, entries] = await Promise.all([store.listCustomers(), store.listAllEntries()]);
+      const customers = everyone.filter((c) => c.kind === kind);
       const byCustomer = new Map();
       for (const e of entries) {
         if (!byCustomer.has(e.customerId)) byCustomer.set(e.customerId, []);
@@ -93,7 +102,11 @@ function createApp({ store, config, clock = () => new Date() }) {
           (c) =>
             c.name.toLowerCase().includes(q) ||
             (c.phone && c.phone.includes(q.replace(/\D/g, '') || '\u0000')) ||
-            (c.area && c.area.toLowerCase().includes(q))
+            (c.area && c.area.toLowerCase().includes(q)) ||
+            // a bill number on any entry that has not been cancelled
+            (byCustomer.get(c.id) || []).some(
+              (e) => !e.voided && e.billNo && e.billNo.toLowerCase().includes(q)
+            )
         );
       }
 
@@ -114,6 +127,7 @@ function createApp({ store, config, clock = () => new Date() }) {
         phone: cleanPhone(body.phone),
         area: cleanText(body.area, { field: 'Area', max: 80 }),
         notes: cleanText(body.notes, { field: 'Notes', max: 500 }),
+        kind: cleanKind(body.kind),
       };
       const customer = await store.createCustomer(data);
       res.status(201).json(customerSummary(customer, [], clock()));
@@ -164,6 +178,7 @@ function createApp({ store, config, clock = () => new Date() }) {
         date: cleanDate(body.date, clock()),
         note: cleanText(body.note, { field: 'Note', max: 300 }),
         method: cleanMethod(body.method, body.type),
+        billNo: cleanBillNo(body.billNo),
       };
       const entry = await store.createEntry(data);
       const entries = await store.listEntries(customer.id);

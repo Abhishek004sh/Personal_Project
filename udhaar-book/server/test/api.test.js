@@ -198,3 +198,74 @@ test('bad JSON gives a clean 400', async () => {
     assert.equal(res.status, 400);
   } finally { server.close(); }
 });
+
+test('suppliers: separate from customers, same hisaab, bill numbers, search', async () => {
+  const clock = () => new Date('2026-10-28T06:00:00Z');
+  const { server, call, login } = await start(clock);
+  try {
+    const t = await login();
+
+    // one customer who owes us, one supplier we owe
+    const cust = (await call('POST', '/api/customers', { name: 'Ramesh Sharma' }, t)).body;
+    await call('POST', `/api/customers/${cust.id}/entries`, { type: 'credit', amountPaise: 300000, date: '2026-10-20' }, t);
+
+    const created = await call('POST', '/api/customers', { name: 'Kumar Plywood Traders', kind: 'supplier', area: 'Delhi' }, t);
+    assert.equal(created.status, 201);
+    assert.equal(created.body.kind, 'supplier');
+    const sup = created.body;
+
+    // maal liya (credit) with a bill number, then partial payment
+    const bought = await call('POST', `/api/customers/${sup.id}/entries`, {
+      type: 'credit', amountPaise: 5000000, date: '2026-10-01', note: '18mm BWP x 40', billNo: ' INV-2041 ',
+    }, t);
+    assert.equal(bought.status, 201);
+    assert.equal(bought.body.entry.billNo, 'INV-2041');
+    assert.equal(bought.body.customer.balancePaise, 5000000);
+
+    const paid = await call('POST', `/api/customers/${sup.id}/entries`, { type: 'payment', amountPaise: 1500000, date: '2026-10-18', method: 'upi' }, t);
+    assert.equal(paid.body.customer.balancePaise, 3500000);
+    assert.equal(paid.body.customer.lastPaymentDays, 10);
+
+    // lists are separate (no kind = customers, as in v1)
+    const customers = (await call('GET', '/api/customers', undefined, t)).body.map((c) => c.name);
+    const suppliers = (await call('GET', '/api/customers?kind=supplier', undefined, t)).body.map((c) => c.name);
+    assert.deepEqual(customers, ['Ramesh Sharma']);
+    assert.deepEqual(suppliers, ['Kumar Plywood Traders']);
+
+    // dashboards are separate: Lena hai vs Dena hai
+    const lena = (await call('GET', '/api/dashboard', undefined, t)).body;
+    const dena = (await call('GET', '/api/dashboard?kind=supplier', undefined, t)).body;
+    assert.equal(lena.totalPendingPaise, 300000);
+    assert.equal(dena.totalPendingPaise, 3500000);
+    assert.equal(dena.customersOwing, 1);
+    assert.equal(dena.collectedThisMonthPaise, 1500000);
+    assert.equal(lena.collectedThisMonthPaise, 0);
+
+    // search finds a supplier by bill number, only inside the supplier list
+    const find = async (kind, q) =>
+      (await call('GET', `/api/customers?kind=${kind}&q=${encodeURIComponent(q)}`, undefined, t)).body.map((c) => c.name);
+    assert.deepEqual(await find('supplier', 'inv-2041'), ['Kumar Plywood Traders']);
+    assert.deepEqual(await find('supplier', '2041'), ['Kumar Plywood Traders']);
+    assert.deepEqual(await find('customer', 'inv-2041'), []);
+
+    // a cancelled entry's bill number is no longer found
+    await call('POST', `/api/entries/${bought.body.entry.id}/void`, { reason: 'wrong supplier' }, t);
+    assert.deepEqual(await find('supplier', 'inv-2041'), []);
+  } finally { server.close(); }
+});
+
+test('suppliers: bad kind and bad bill number are refused', async () => {
+  const { server, call, login } = await start();
+  try {
+    const t = await login();
+    assert.equal((await call('POST', '/api/customers', { name: 'X', kind: 'friend' }, t)).status, 400);
+    assert.equal((await call('GET', '/api/customers?kind=friend', undefined, t)).status, 400);
+    assert.equal((await call('GET', '/api/dashboard?kind=friend', undefined, t)).status, 400);
+
+    const s = (await call('POST', '/api/customers', { name: 'Mica Supplier', kind: 'supplier' }, t)).body;
+    const url = `/api/customers/${s.id}/entries`;
+    assert.equal((await call('POST', url, { type: 'credit', amountPaise: 100, billNo: 'B'.repeat(41) }, t)).status, 400);
+    assert.equal((await call('POST', url, { type: 'credit', amountPaise: 100, billNo: 12345 }, t)).status, 400);
+    assert.equal((await call('POST', url, { type: 'credit', amountPaise: 100 }, t)).status, 201); // bill number is optional
+  } finally { server.close(); }
+});

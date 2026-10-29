@@ -102,3 +102,36 @@ test('dashboard totals, top list, overdue list and month figures', () => {
   assert.equal(d.collectedThisMonthPaise, 300000);
   assert.equal(d.creditThisMonthPaise, 300000);
 });
+
+test('customer summary: days since the last payment (null when never paid)', () => {
+  const now = new Date('2026-10-28T06:00:00Z');
+  const paid = customerSummary(
+    { id: 'a', name: 'Supplier A' },
+    [credit(500000, '2026-09-01T06:30:00Z'), payment(100000, '2026-10-08T06:30:00Z')],
+    now
+  );
+  assert.equal(paid.lastPaymentDays, 20);
+  const never = customerSummary({ id: 'b', name: 'Supplier B' }, [credit(500000, '2026-09-01T06:30:00Z')], now);
+  assert.equal(never.lastPaymentDays, null);
+});
+
+test('dashboard: accounts with nothing paid for 30+ days (or ever) are listed, biggest first', () => {
+  const now = new Date('2026-10-28T06:00:00Z');
+  const parties = [
+    { id: 'a', name: 'Paid last week' },
+    { id: 'b', name: 'Paid long ago' },
+    { id: 'c', name: 'Never paid' },
+    { id: 'd', name: 'Settled' },
+  ];
+  const entries = [
+    credit(900000, '2026-08-01T06:30:00Z', { customerId: 'a' }),
+    payment(100000, '2026-10-21T06:30:00Z', { customerId: 'a' }),
+    credit(500000, '2026-07-01T06:30:00Z', { customerId: 'b' }),
+    payment(100000, '2026-08-20T06:30:00Z', { customerId: 'b' }),
+    credit(700000, '2026-10-01T06:30:00Z', { customerId: 'c' }),
+    credit(100000, '2026-09-01T06:30:00Z', { customerId: 'd' }),
+    payment(100000, '2026-09-02T06:30:00Z', { customerId: 'd' }),
+  ];
+  const d = buildDashboard(parties, entries, now);
+  assert.deepEqual(d.noRecentPayment.map((p) => p.name), ['Never paid', 'Paid long ago']);
+});

@@ -3,12 +3,14 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useLoad } from '../useLoad.js';
 import { formatRupees, formatDate, whatsappLink } from '../money.js';
-import { t, getLang } from '../strings.js';
+import { t, getLang, entryLabel } from '../strings.js';
 import Sheet from '../components/Sheet.jsx';
 import CustomerForm from '../components/CustomerForm.jsx';
 import EntrySheet from '../components/EntrySheet.jsx';
 import VoidSheet from '../components/VoidSheet.jsx';
 
+// The account page for one person. Works for customers (Lena hai) and
+// suppliers (Dena hai): the same hisaab, with different words.
 export default function CustomerDetail() {
   const { id } = useParams();
   const { data, error, loading, reload } = useLoad(() => api.customer(id), [id]);
@@ -26,11 +28,14 @@ export default function CustomerDetail() {
 
   const { customer, entries } = data;
   const { balancePaise } = customer;
+  const isSupplier = customer.kind === 'supplier';
+  const listPath = isSupplier ? '/suppliers' : '/customers';
   const close = () => setSheet(null);
   const saved = () => { close(); reload(); };
 
+  // A reminder message is only for customers. We do not remind our suppliers.
   const reminder =
-    balancePaise > 0
+    !isSupplier && balancePaise > 0
       ? whatsappLink(customer.phone, t.reminderMessage(customer.name, formatRupees(balancePaise)))
       : null;
 
@@ -38,9 +43,24 @@ export default function CustomerDetail() {
   let balanceLabel = t.settled;
   let balanceText = formatRupees(0);
   if (balancePaise > 0) {
-    balanceClass = 'owed'; balanceLabel = t.pending; balanceText = formatRupees(balancePaise);
+    balanceClass = 'owed';
+    balanceLabel = isSupplier ? t.payCard : t.pending;
+    balanceText = formatRupees(balancePaise);
   } else if (balancePaise < 0) {
-    balanceClass = 'paid'; balanceLabel = t.advance; balanceText = formatRupees(-balancePaise);
+    balanceClass = 'paid';
+    balanceLabel = isSupplier ? t.advancePaid : t.advance;
+    balanceText = formatRupees(-balancePaise);
+  }
+
+  // Customers: how old is the oldest unpaid amount.
+  // Suppliers: when did we last pay (their accounts run on and are paid a little at a time).
+  let ageLine = '';
+  if (balancePaise > 0) {
+    if (isSupplier) {
+      ageLine = customer.lastPaymentDays === null ? t.neverPaid : t.lastPaid(customer.lastPaymentDays);
+    } else if (customer.oldestUnpaidDays !== null) {
+      ageLine = t.oldestPending(t.days(customer.oldestUnpaidDays));
+    }
   }
 
   async function saveCustomer(form) {
@@ -50,7 +70,7 @@ export default function CustomerDetail() {
 
   return (
     <div className="stack">
-      <Link to="/customers" className="back">← {t.navCustomers}</Link>
+      <Link to={listPath} className="back">← {isSupplier ? t.navSuppliers : t.navCustomers}</Link>
 
       <section className="card">
         <div className="detail-head">
@@ -65,14 +85,16 @@ export default function CustomerDetail() {
         <div className="balance">
           <div className="hero-label">{balanceLabel}</div>
           <div className={`balance-amount ${balanceClass}`}>{balanceText}</div>
-          {balancePaise > 0 && customer.oldestUnpaidDays !== null && (
-            <div className="row-sub">{t.oldestPending(t.days(customer.oldestUnpaidDays))}</div>
-          )}
+          {ageLine && <div className="row-sub">{ageLine}</div>}
         </div>
 
         <div className="actions">
-          <button type="button" className="btn credit" onClick={() => setSheet('credit')}>{t.gaveGoods}</button>
-          <button type="button" className="btn payment" onClick={() => setSheet('payment')}>{t.gotPayment}</button>
+          <button type="button" className="btn credit" onClick={() => setSheet('credit')}>
+            {isSupplier ? t.tookGoods : t.gaveGoods}
+          </button>
+          <button type="button" className="btn payment" onClick={() => setSheet('payment')}>
+            {isSupplier ? t.gavePayment : t.gotPayment}
+          </button>
         </div>
 
         {customer.phone && (
@@ -96,10 +118,14 @@ export default function CustomerDetail() {
               <li key={e.id} className={e.voided ? 'voided' : ''}>
                 <div className="history-main">
                   <div className="history-type">
-                    {t[e.type]}
+                    {entryLabel(customer.kind, e.type)}
                     {e.type === 'payment' && e.method ? ` · ${t[e.method] || e.method}` : ''}
                   </div>
-                  <div className="row-sub">{formatDate(e.date, getLang())}{e.note ? ` · ${e.note}` : ''}</div>
+                  <div className="row-sub">
+                    {formatDate(e.date, getLang())}
+                    {e.billNo ? ` · ${t.billText(e.billNo)}` : ''}
+                    {e.note ? ` · ${e.note}` : ''}
+                  </div>
                   {e.voided && (
                     <div className="row-sub">{t.cancelledLabel}: {e.voided.reason}</div>
                   )}
@@ -128,7 +154,9 @@ export default function CustomerDetail() {
           <CustomerForm initial={customer} onSubmit={saveCustomer} onCancel={close} />
         </Sheet>
       )}
-      {sheet && sheet.void && <VoidSheet entry={sheet.void} onClose={close} onDone={saved} />}
+      {sheet && sheet.void && (
+        <VoidSheet entry={sheet.void} kind={customer.kind} onClose={close} onDone={saved} />
+      )}
     </div>
   );
 }

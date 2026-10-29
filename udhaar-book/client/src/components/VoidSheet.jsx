@@ -2,11 +2,11 @@ import { useState } from 'react';
 import Sheet from './Sheet.jsx';
 import { api } from '../api.js';
 import { formatRupees, formatDate } from '../money.js';
-import { t, getLang } from '../strings.js';
+import { t, getLang, entryLabel } from '../strings.js';
 
 // Entries are never deleted. A wrong entry is cancelled with a reason and
 // stays in the history.
-export default function VoidSheet({ entry, onClose, onDone }) {
+export default function VoidSheet({ entry, kind = 'customer', onClose, onDone }) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -28,7 +28,7 @@ export default function VoidSheet({ entry, onClose, onDone }) {
     <Sheet title={t.cancelEntryTitle} onClose={onClose}>
       <form onSubmit={submit} className="form">
         <p className="preview">
-          {t[entry.type]} · <strong>{formatRupees(entry.amountPaise)}</strong> · {formatDate(entry.date, getLang())}
+          {entryLabel(kind, entry.type)} ·<strong>{formatRupees(entry.amountPaise)}</strong> · {formatDate(entry.date, getLang())}
         </p>
         <p className="help">{t.cancelEntryHelp}</p>
         <label>

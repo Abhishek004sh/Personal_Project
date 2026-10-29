@@ -11,6 +11,9 @@ const customerSchema = new mongoose.Schema(
     // Every person is one record with roles, so carpenters/contractors can
     // be added later without a second list.
     roles: { type: [String], default: ['customer'] },
+    // Customers owe us ("Lena hai"); suppliers are owed by us ("Dena hai").
+    // Records saved before this existed have no kind and count as customers.
+    kind: { type: String, enum: ['customer', 'supplier'], default: 'customer' },
     archived: { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -26,6 +29,7 @@ const entrySchema = new mongoose.Schema(
     date: { type: Date, required: true },
     note: { type: String, default: '' },
     method: { type: String, default: '' },
+    billNo: { type: String, default: '', maxlength: 40 },
     voided: {
       type: new mongoose.Schema({ reason: String, at: Date }, { _id: false }),
       default: null,
@@ -47,6 +51,7 @@ function plainCustomer(doc) {
     phone: doc.phone || '',
     area: doc.area || '',
     notes: doc.notes || '',
+    kind: doc.kind || 'customer',
     roles: doc.roles || ['customer'],
     archived: !!doc.archived,
     createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : null,
@@ -64,6 +69,7 @@ function plainEntry(doc) {
     date: new Date(doc.date).toISOString(),
     note: doc.note || '',
     method: doc.method || '',
+    billNo: doc.billNo || '',
     voided: doc.voided
       ? { reason: doc.voided.reason, at: new Date(doc.voided.at).toISOString() }
       : null,
@@ -91,6 +97,8 @@ function createMongoStore() {
         phone: data.phone || '',
         area: data.area || '',
         notes: data.notes || '',
+        kind: data.kind || 'customer',
+        roles: [data.kind || 'customer'],
       });
       return plainCustomer(doc.toObject());
     },
@@ -125,6 +133,7 @@ function createMongoStore() {
         date: data.date,
         note: data.note || '',
         method: data.method || '',
+        billNo: data.billNo || '',
       });
       return plainEntry(doc.toObject());
     },
