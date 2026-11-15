@@ -24,9 +24,12 @@ export default function Login({ onLoggedIn, lang, onLang }) {
 
   return (
     <main className="login">
-      <LanguageSwitch lang={lang} onChange={onLang} className="on-light login-lang" />
-      <img src="/icon-192.png" alt="" width="72" height="72" className="login-logo" />
-      <h1>{t.appName}</h1>
+      <div className="login-top">
+        <LanguageSwitch lang={lang} onChange={onLang} className="on-light login-lang" />
+        <img src="/icon-192.png" alt="" width="72" height="72" className="login-logo" />
+        <h1>{t.appName}</h1>
+        <p className="login-welcome">{t.loginWelcome}</p>
+      </div>
       <form onSubmit={submit} className="form">
         <label>
           {t.password}

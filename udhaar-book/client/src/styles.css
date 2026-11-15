@@ -216,16 +216,28 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
 
 /* Login */
-.login { max-width: 360px; margin: 0 auto; padding: 14vh 20px 20px; display: grid; gap: 18px; justify-items: center; }
-.login .form { width: 100%; }
+.login {
+  min-height: 100dvh; display: grid; align-content: start; justify-items: center;
+  gap: 28px; padding: calc(16px + env(safe-area-inset-top)) 20px 20px;
+}
+.login-top {
+  width: 100%; max-width: 360px; display: grid; justify-items: center; gap: 10px;
+  text-align: center; padding: 10vh 0 6vh;
+  background: linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 70%, var(--bg)) 85%, var(--bg) 100%);
+  margin: calc(-16px - env(safe-area-inset-top)) -20px 0; padding-left: 20px; padding-right: 20px;
+  color: var(--brand-ink); border-radius: 0 0 28px 28px;
+}
+.login-top h1 { font-size: 24px; margin-top: 4px; }
+.login-welcome { margin: 0; font-size: 15px; opacity: 0.92; max-width: 280px; }
+.login .form { width: 100%; max-width: 360px; }
 .login-logo { border-radius: 18px; }
 
 /* Language button: shows the language in use, tap to move to the next one */
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 .lang-btn {
   min-height: 40px; padding: 0 14px; border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--brand-ink) 55%, transparent);
-  background: transparent; color: var(--brand-ink);
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 70%, transparent);
+  background: color-mix(in srgb, var(--brand-ink) 14%, transparent); color: var(--brand-ink);
   font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
 }
 .lang-btn.on-light { border-color: var(--brand); color: var(--brand); }
