@@ -3,11 +3,12 @@ import { api } from '../api.js';
 import { useLoad } from '../useLoad.js';
 import { formatRupees } from '../money.js';
 import { t } from '../strings.js';
-import CustomerRow from '../components/CustomerRow.jsx';
 
+// Home is kept deliberately minimal: just the two numbers that matter most
+// (what we'll receive, what we owe). Full lists, sorted by balance, live on
+// the Customers and Suppliers tabs — Home does not repeat them, so there is
+// only one place to look for the detail and nothing extra to read here.
 export default function Home() {
-  // Two questions asked together: how much will we receive (customers)
-  // and how much do we have to pay (suppliers).
   const { data, error, loading, reload } = useLoad(
     () =>
       Promise.all([api.dashboard('customer'), api.dashboard('supplier')]).then(([lena, dena]) => ({ lena, dena })),
@@ -50,68 +51,6 @@ export default function Home() {
           <div className="hero-sub">{t.suppliersToPay(dena.customersOwing)}</div>
         </Link>
       </section>
-
-      {lena.totalCustomers > 0 && (
-        <>
-          <section className="stats">
-            <div className="stat">
-              <div className="stat-label">{t.collectedThisMonth}</div>
-              <div className="stat-value paid">{formatRupees(lena.collectedThisMonthPaise)}</div>
-            </div>
-            <div className="stat">
-              <div className="stat-label">{t.creditThisMonth}</div>
-              <div className="stat-value">{formatRupees(lena.creditThisMonthPaise)}</div>
-            </div>
-          </section>
-
-          {lena.overdueCount > 0 && (
-            <section>
-              <h2 className="section-title">
-                {t.overdueTitle(lena.overdueDays)}
-                <span className="section-note">{lena.overdueCount} · {formatRupees(lena.overduePaise)}</span>
-              </h2>
-              <div className="list">
-                {lena.overdue.map((c) => <CustomerRow key={c.id} customer={c} />)}
-              </div>
-            </section>
-          )}
-
-          <section>
-            <h2 className="section-title">{t.topPendingTitle}</h2>
-            {lena.topOwing.length === 0 ? (
-              <p className="muted">{t.nothingPending}</p>
-            ) : (
-              <div className="list">
-                {lena.topOwing.map((c) => <CustomerRow key={c.id} customer={c} />)}
-              </div>
-            )}
-          </section>
-        </>
-      )}
-
-      {dena.totalCustomers > 0 && (
-        <>
-          {dena.noRecentPayment.length > 0 && (
-            <section>
-              <h2 className="section-title">{t.noRecentPaymentTitle(dena.overdueDays)}</h2>
-              <div className="list">
-                {dena.noRecentPayment.map((c) => <CustomerRow key={c.id} customer={c} />)}
-              </div>
-            </section>
-          )}
-
-          <section>
-            <h2 className="section-title">{t.topOwedSuppliersTitle}</h2>
-            {dena.topOwing.length === 0 ? (
-              <p className="muted">{t.nothingToPay}</p>
-            ) : (
-              <div className="list">
-                {dena.topOwing.map((c) => <CustomerRow key={c.id} customer={c} />)}
-              </div>
-            )}
-          </section>
-        </>
-      )}
     </div>
   );
 }

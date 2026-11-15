@@ -227,14 +227,17 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
 .login { position: relative; }
 .login-lang { position: absolute; top: 16px; right: 16px; }
 
-/* Home: two big cards, "Lena hai" (customers) and "Dena hai" (suppliers). Each one opens its section. */
-.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Home: two big cards, "Lena hai" (customers) and "Dena hai" (suppliers). Each
+   one opens its section. Stacked full-width (not side by side) so the number
+   is as large and legible as possible at a glance, from across the counter. */
+.cards { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 4px; }
 .hero-card {
-  display: block; border-radius: var(--radius); padding: 16px 14px; min-height: 120px;
+  display: block; border-radius: var(--radius); padding: 22px 20px; min-height: 108px;
   background: var(--brand); color: var(--brand-ink);
 }
 .hero-card.pay { background: var(--card); color: var(--text); border: 2px solid var(--brand); }
-.hero-card .hero-label { font-size: 16px; font-weight: 700; opacity: 1; }
+.hero-card .hero-label { font-size: 19px; font-weight: 700; opacity: 1; }
 .hero-card.pay .hero-label { color: var(--brand); }
-.hero-card .hero-amount { font-size: clamp(22px, 6.4vw, 32px); overflow-wrap: anywhere; }
+.hero-card .hero-amount { font-size: clamp(32px, 11vw, 44px); font-weight: 800; overflow-wrap: anywhere; margin-top: 2px; }
+.hero-card .hero-sub { font-size: 15px; margin-top: 4px; }
 .hero-card:active { filter: brightness(0.95); }
