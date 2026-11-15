@@ -122,6 +122,11 @@ a { color: inherit; text-decoration: none; }
 }
 .row:last-child { border-bottom: 0; }
 .row:active { background: var(--bg); }
+.avatar {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 16px;
+}
 .row-main { min-width: 0; }
 .row-title { font-weight: 600; overflow-wrap: anywhere; }
 .row-sub { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
