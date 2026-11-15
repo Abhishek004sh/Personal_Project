@@ -155,7 +155,10 @@ a { color: inherit; text-decoration: none; }
 .stat-value { font-size: 20px; font-weight: 700; margin-top: 2px; }
 
 /* Customer page */
-.detail-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; align-items: flex-start; }
+.detail-head .link-btn { white-space: nowrap; }
+.detail-head-main { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.avatar-lg { width: 48px; height: 48px; font-size: 19px; }
 .detail-name { font-size: 22px; overflow-wrap: anywhere; }
 .balance-amount { font-size: 34px; font-weight: 800; line-height: 1.15; }
 .balance-amount.muted { font-weight: 700; }
