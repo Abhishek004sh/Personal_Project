@@ -241,6 +241,12 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
   background: var(--brand); color: var(--brand-ink);
 }
 .hero-card.pay { background: var(--card); color: var(--text); border: 2px solid var(--brand); }
+.hero-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%; font-size: 18px; font-weight: 700;
+  background: rgba(255, 255, 255, 0.22); color: var(--brand-ink); margin-bottom: 8px;
+}
+.hero-card.pay .hero-icon { background: color-mix(in srgb, var(--brand) 16%, transparent); color: var(--brand); }
 .hero-card .hero-label { font-size: 19px; font-weight: 700; opacity: 1; }
 .hero-card.pay .hero-label { color: var(--brand); }
 .hero-card .hero-amount { font-size: clamp(32px, 11vw, 44px); font-weight: 800; overflow-wrap: anywhere; margin-top: 2px; }

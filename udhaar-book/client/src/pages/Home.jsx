@@ -41,11 +41,13 @@ export default function Home() {
     <div className="stack">
       <section className="cards">
         <Link to="/customers" className="hero-card receive">
+          <div className="hero-icon" aria-hidden="true">↙</div>
           <div className="hero-label">{t.receiveCard}</div>
           <div className="hero-amount">{formatRupees(lena.totalPendingPaise)}</div>
           <div className="hero-sub">{t.customersOwing(lena.customersOwing)}</div>
         </Link>
         <Link to="/suppliers" className="hero-card pay">
+          <div className="hero-icon" aria-hidden="true">↗</div>
           <div className="hero-label">{t.payCard}</div>
           <div className="hero-amount">{formatRupees(dena.totalPendingPaise)}</div>
           <div className="hero-sub">{t.suppliersToPay(dena.customersOwing)}</div>
