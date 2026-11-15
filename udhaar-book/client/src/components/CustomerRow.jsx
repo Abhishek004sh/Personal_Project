@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { formatRupees } from '../money.js';
 import { t } from '../strings.js';
+import { avatarColor, avatarInitial } from '../avatar.js';
 
 export default function CustomerRow({ customer }) {
   const { id, name, area, phone, balancePaise, oldestUnpaidDays, lastPaymentDays, kind } = customer;
@@ -27,6 +28,9 @@ export default function CustomerRow({ customer }) {
 
   return (
     <Link to={`${isSupplier ? '/suppliers' : '/customers'}/${id}`} className="row">
+      <div className="avatar" style={{ background: avatarColor(name) }} aria-hidden="true">
+        {avatarInitial(name)}
+      </div>
       <div className="row-main">
         <div className="row-title">{name}</div>
         {sub && <div className="row-sub">{sub}</div>}

@@ -122,6 +122,11 @@ a { color: inherit; text-decoration: none; }
 }
 .row:last-child { border-bottom: 0; }
 .row:active { background: var(--bg); }
+.avatar {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 16px;
+}
 .row-main { min-width: 0; }
 .row-title { font-weight: 600; overflow-wrap: anywhere; }
 .row-sub { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
@@ -150,7 +155,10 @@ a { color: inherit; text-decoration: none; }
 .stat-value { font-size: 20px; font-weight: 700; margin-top: 2px; }
 
 /* Customer page */
-.detail-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; align-items: flex-start; }
+.detail-head .link-btn { white-space: nowrap; }
+.detail-head-main { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.avatar-lg { width: 48px; height: 48px; font-size: 19px; }
 .detail-name { font-size: 22px; overflow-wrap: anywhere; }
 .balance-amount { font-size: 34px; font-weight: 800; line-height: 1.15; }
 .balance-amount.muted { font-weight: 700; }
@@ -211,16 +219,28 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
 
 /* Login */
-.login { max-width: 360px; margin: 0 auto; padding: 14vh 20px 20px; display: grid; gap: 18px; justify-items: center; }
-.login .form { width: 100%; }
+.login {
+  min-height: 100dvh; display: grid; align-content: start; justify-items: center;
+  gap: 28px; padding: calc(16px + env(safe-area-inset-top)) 20px 20px;
+}
+.login-top {
+  width: 100%; max-width: 360px; display: grid; justify-items: center; gap: 10px;
+  text-align: center; padding: 10vh 0 6vh;
+  background: linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 70%, var(--bg)) 85%, var(--bg) 100%);
+  margin: calc(-16px - env(safe-area-inset-top)) -20px 0; padding-left: 20px; padding-right: 20px;
+  color: var(--brand-ink); border-radius: 0 0 28px 28px;
+}
+.login-top h1 { font-size: 24px; margin-top: 4px; }
+.login-welcome { margin: 0; font-size: 15px; opacity: 0.92; max-width: 280px; }
+.login .form { width: 100%; max-width: 360px; }
 .login-logo { border-radius: 18px; }
 
 /* Language button: shows the language in use, tap to move to the next one */
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 .lang-btn {
   min-height: 40px; padding: 0 14px; border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--brand-ink) 55%, transparent);
-  background: transparent; color: var(--brand-ink);
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 70%, transparent);
+  background: color-mix(in srgb, var(--brand-ink) 14%, transparent); color: var(--brand-ink);
   font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
 }
 .lang-btn.on-light { border-color: var(--brand); color: var(--brand); }
@@ -236,6 +256,12 @@ fieldset.chips legend { width: 100%; margin-bottom: 6px; padding: 0; }
   background: var(--brand); color: var(--brand-ink);
 }
 .hero-card.pay { background: var(--card); color: var(--text); border: 2px solid var(--brand); }
+.hero-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%; font-size: 18px; font-weight: 700;
+  background: rgba(255, 255, 255, 0.22); color: var(--brand-ink); margin-bottom: 8px;
+}
+.hero-card.pay .hero-icon { background: color-mix(in srgb, var(--brand) 16%, transparent); color: var(--brand); }
 .hero-card .hero-label { font-size: 19px; font-weight: 700; opacity: 1; }
 .hero-card.pay .hero-label { color: var(--brand); }
 .hero-card .hero-amount { font-size: clamp(32px, 11vw, 44px); font-weight: 800; overflow-wrap: anywhere; margin-top: 2px; }

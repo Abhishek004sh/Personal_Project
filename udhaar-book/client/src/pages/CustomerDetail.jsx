@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import { useLoad } from '../useLoad.js';
 import { formatRupees, formatDate, whatsappLink } from '../money.js';
 import { t, getLang, entryLabel } from '../strings.js';
+import { avatarColor, avatarInitial } from '../avatar.js';
 import Sheet from '../components/Sheet.jsx';
 import CustomerForm from '../components/CustomerForm.jsx';
 import EntrySheet from '../components/EntrySheet.jsx';
@@ -74,10 +75,15 @@ export default function CustomerDetail() {
 
       <section className="card">
         <div className="detail-head">
-          <div>
-            <h1 className="detail-name">{customer.name}</h1>
-            <div className="row-sub">{[customer.area, customer.phone].filter(Boolean).join(' · ')}</div>
-            {customer.notes && <div className="row-sub notes">{customer.notes}</div>}
+          <div className="detail-head-main">
+            <div className="avatar avatar-lg" style={{ background: avatarColor(customer.name) }} aria-hidden="true">
+              {avatarInitial(customer.name)}
+            </div>
+            <div>
+              <h1 className="detail-name">{customer.name}</h1>
+              <div className="row-sub">{[customer.area, customer.phone].filter(Boolean).join(' · ')}</div>
+              {customer.notes && <div className="row-sub notes">{customer.notes}</div>}
+            </div>
           </div>
           <button type="button" className="link-btn" onClick={() => setSheet('edit')}>{t.editCustomer}</button>
         </div>
@@ -99,9 +105,11 @@ export default function CustomerDetail() {
 
         {customer.phone && (
           <div className="actions small">
-            <a className="btn" href={`tel:+91${customer.phone}`}>{t.call}</a>
+            <a className="btn" href={`tel:+91${customer.phone}`}><span aria-hidden="true">📞 </span>{t.call}</a>
             {reminder && (
-              <a className="btn" href={reminder} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a>
+              <a className="btn" href={reminder} target="_blank" rel="noopener noreferrer">
+                <span aria-hidden="true">💬 </span>{t.whatsapp}
+              </a>
             )}
           </div>
         )}

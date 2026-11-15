@@ -13,6 +13,7 @@ const en = {
 
   // login
   loginTitle: 'Log in',
+  loginWelcome: 'Your shop’s hisaab, all in one place',
   password: 'Password',
   loginButton: 'Log in',
   loggingIn: 'Logging in…',
@@ -136,6 +137,7 @@ const hinglish = {
   appName: 'Udhaar Bahi',
 
   loginTitle: 'Log in',
+  loginWelcome: 'Aapki dukan ka pura hisaab, ek hi jagah',
   password: 'Password',
   loginButton: 'Log in karein',
   loggingIn: 'Log in ho raha hai…',
@@ -251,6 +253,7 @@ const hi = {
   appName: 'उधार बही',
 
   loginTitle: 'लॉग इन',
+  loginWelcome: 'आपकी दुकान का पूरा हिसाब, एक ही जगह',
   password: 'पासवर्ड',
   loginButton: 'लॉग इन करें',
   loggingIn: 'लॉग इन हो रहा है…',
